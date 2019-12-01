@@ -1,0 +1,31 @@
+{
+  "name": "www.jiangore.com",
+  "version": "1.0.0",
+  "author": "jiangore",
+  "keywords": ["blog", "jiangore"],
+  "description": "this is my website",
+  "main": "app.js",
+  "license": "Apache-2.0",
+  "private": true,
+  "homepage": "https://github.com/jiangore/www.jiangore.com#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiangore/www.jiangore.com.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jiangore/www.jiangore.com/issues"
+  },
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1"
+  }
+  
+}
