@@ -1,41 +1,41 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
 
-var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
+let dotEnv = require('dotenv');
+dotEnv.config({
+  encoding: 'utf8',
+  debug: process.env.DEBUG,
+  path: path.resolve(process.cwd(), '.env')
+});
+
+let app = express();
+
+// 视图引擎配置
+app.set('views', path.join(__dirname, 'views/ejs'));
+// app.set('view engine', 'pug');
 app.set('view engine', 'ejs');
-
-app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.query());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// morgan 日志中间件
+require('./src/middlewares/morgan')(app);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+// 中间件 路由规则
+require('./src/middlewares/routeRule')(app);
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+// 中间件 处理微信公众号消息
+require('./src/middlewares/wechat')(app);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+// 中间件 捕获404，跳转到错误处理中间件
+require('./src/middlewares/error404')(app);
+
+// 中间件 错误处理
+require('./src/middlewares/errorHandler')(app);
 
 module.exports = app;

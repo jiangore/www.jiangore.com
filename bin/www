@@ -4,87 +4,91 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('www.jiangore.com:server');
-var http = require('http');
+let app = require('../app');
+let debug = require('debug')('tao-website:server');
+let http = require('http');
 
 /**
  * Get port from environment and store in Express.
+ * 从环境变量获取端口并存储到Express
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.APP_PORT || '8090');
 app.set('port', port);
 
 /**
  * Create HTTP server.
+ * 创建HTTP服务器
  */
-
-var server = http.createServer(app);
+let server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
+ * 监听端口，并处理连接事件
  */
 
 server.listen(port);
-server.on('error', onError);
 server.on('listening', onListening);
+server.on('error', onError);
+server.on('close', onClose);
+
 
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
+    let port = parseInt(val, 10);
+    if (isNaN(port)) {
+        return val;
+    }
+    if (port >= 0) {
+        return port;
+    }
+    return false;
 }
 
 /**
  * Event listener for HTTP server "error" event.
+ * 监听error事件
  */
-
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+    let bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            //console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            //console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
 }
 
 /**
  * Event listener for HTTP server "listening" event.
+ * 监听listening事件
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+    let addr = server.address();
+    let bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+    debug('Listening on ' + bind);
+    console.log('Server is started at 127.0.0.1:' + port);
+}
+
+/**
+ * 监听close事件
+ */
+function onClose() {
+    debug('HTTP Server is stopped');
+    //console.log('HTTP Server is stopped');
 }
