@@ -1,5 +1,6 @@
 
-let echo = require("debug")('tao-website:redisClient');
+let app_name = process.env.APP_NAME;
+let echo = require('debug')(app_name+':redisClient');
 
 const redis = require('redis');
 const moment = require('moment');

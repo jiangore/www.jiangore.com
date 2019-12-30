@@ -1,5 +1,6 @@
 
-let echo = require("debug")('tao-website:routeIndex');
+let app_name = process.env.APP_NAME;
+let echo = require('debug')(app_name+':routeIndex');
 
 let express = require('express');
 let router = express.Router();

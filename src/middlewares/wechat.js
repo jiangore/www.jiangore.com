@@ -4,8 +4,9 @@
  * @date 2019-12-05 11:06:00
  * @version v1.0
  */
+let app_name = process.env.APP_NAME;
+let echo = require('debug')(app_name+':wx-middleware');
 
-let echo = require("debug")('app:weChat-middleware');
 let weChat = require('wechat');
 let params = require('../params');
 const apiUrl = require('../apiUrl');
@@ -15,7 +16,6 @@ const axios = require('axios');
 
 
 module.exports = function (app) {
-
     app.use('/wx', weChat(params.wxConfig).text(function (message, req, res, next) {
         let xxx = req.weixin;
         console.log(message);

@@ -19,9 +19,9 @@
     "url": "https://github.com/jiangore/www.jiangore.com/issues"
   },
   "scripts": {
-    "start": "set NODE_ENV=production && set DEBUG=tao-website:* && pm2 start ./bin/www --name jiangore",
-    "dev": "set NODE_ENV=development && set DEBUG=tao-website:* && nodemon ./bin/www",
-    "pro": "set NODE_ENV=production && set DEBUG=tao-website:* && node ./bin/www"
+    "start": "set NODE_ENV=production && set DEBUG=dandelion:* && pm2 start ./bin/www --name jiangore",
+    "dev": "set NODE_ENV=development && set DEBUG=dandelion:* && nodemon ./bin/www",
+    "pro": "set NODE_ENV=production && set DEBUG=dandelion:* && node ./bin/www"
   },
   "dependencies": {
     "axios": "^0.19.0",

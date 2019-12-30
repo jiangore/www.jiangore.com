@@ -1,8 +1,9 @@
 /**
  * MySQL客户端
  */
+let app_name = process.env.APP_NAME;
+let echo = require('debug')(app_name+':mysql');
 
-const echo = require('debug')('tao-website:mysql');
 const Sequelize = require('sequelize');
 
 const params = require('../params');

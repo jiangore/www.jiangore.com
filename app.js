@@ -3,13 +3,14 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 
-
 let dotEnv = require('dotenv');
 dotEnv.config({
   encoding: 'utf8',
   debug: process.env.DEBUG,
   path: path.resolve(process.cwd(), '.env')
 });
+
+console.log(require('./src/params'));
 
 let app = express();
 
