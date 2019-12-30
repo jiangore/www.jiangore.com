@@ -16,7 +16,7 @@ const axios = require('axios');
 
 module.exports = function (app) {
 
-    app.use('/wx2', weChat(params.wxConfig).text(function (message, req, res, next) {
+    app.use('/wx', weChat(params.wxConfig).text(function (message, req, res, next) {
         let xxx = req.weixin;
         console.log(message);
 
