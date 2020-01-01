@@ -13,4 +13,7 @@ module.exports = {
     FACE_VALUE_REDIS_PREFIX: 'wx:faceValue:rs:',
     //测颜值结果 redis 保留10天
     FACE_VALUE_REDIS_EXPIRE: 8640000,
+
+    // 一言场景代码
+    MOTTO_SCENE_CODE: 1010,
 };
