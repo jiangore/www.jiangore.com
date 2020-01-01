@@ -39,6 +39,16 @@ function handler(message, req, resp, next) {
             resp.reply('发送一张你的靓照吧！');
             return resp;
         }
+        if (wxScene == '' && content == '音乐') {
+            req.wxsession.wxScene = wxConstant.MUSIC_SCENE_CODE;
+
+            let text = '回复[歌曲+歌曲名]\n';
+            text += '回复[歌手+歌手名]\n';
+            text += '关键词不带[]';
+            resp.reply(text);
+            return resp;
+        }
+
         if (wxScene == '' && content == '格言') {
             req.wxsession.wxScene = wxConstant.MOTTO_SCENE_CODE;
 
@@ -94,6 +104,11 @@ function handler(message, req, resp, next) {
             }
         }
 
+        //网易云音乐
+        if (wxScene == wxConstant.MUSIC_SCENE_CODE) {
+            getMusicList(message, req, resp);
+        }
+
         //一言
         if (wxScene == wxConstant.MOTTO_SCENE_CODE) {
             motto(message, req, resp);
@@ -106,8 +121,9 @@ function handler(message, req, resp, next) {
             req.wxsession.wxScene = '';
 
             let text = '回复[小冰]：和智能机器人聊天\n';
-            text += '回复[颜值]：给的颜值评分\n';
-            text += '回复[格言]：一句话穿透你的心\n';
+            text += '回复[颜值]：给你的Ta颜值评分\n';
+            text += '回复[音乐]：发现你喜欢的音乐\n';
+            text += '回复[格言]：一句戳中你内心的话\n';
             text += '回复[退出]：退出当前场景\n';
             text += '关键词不带[]';
             resp.reply(text);
@@ -159,7 +175,7 @@ function chatRobot(message, req, resp) {
 
         })
         .catch(function (error) {
-            resp.reply('休息中~');
+            resp.reply('😭 服务维护中~');
         });
 }
 
@@ -185,7 +201,64 @@ function motto(message, req, resp) {
         })
         .catch(function (error) {
             echo('一言接口调用失败');
-            resp.reply('休息中~');
+            resp.reply('😭 服务维护中~');
+        });
+}
+
+function getMusicList(message, req, resp) {
+    let content = message.Content || '';
+    let arr = content.split('+');
+    if (content == '' || arr.length !=2 || (arr[0] != '歌曲' && arr[0] != '歌手') || arr[1] == '') {
+        let text = '回复[歌曲+歌曲名]\n';
+        text += '回复[歌手+歌手名]\n';
+        text += '关键词不带[]';
+        resp.reply(text);
+        return resp;
+    }
+
+    let musicUrl = 'https://v1.hitokoto.cn/nm/search/'+urlEncode('大鱼')+'?type=SONG&offset=0&limit=8';
+    if (arr[0] == '歌曲') {
+        musicUrl = 'https://v1.hitokoto.cn/nm/search/'+urlEncode(arr[1])+'?type=SONG&offset=0&limit=8';
+    }
+    if (arr[0] == '歌手') {
+        musicUrl = 'https://v1.hitokoto.cn/nm/search/'+urlEncode(arr[1])+'?type=ARTIST&offset=0&limit=8';
+    }
+    axios
+        .get(musicUrl)
+        .then(function (response) {
+            let data = response.data;
+            if (data.code == 200) {
+                let list = data.result.songs;
+                if (list.length == 0) {
+                    resp.reply('😥 没有找到您要的歌曲~');
+                } else {
+                    let musics = [];
+                    for (let i = 0; i < list.length; i++) {
+                        let songName = list[i].name;
+                        let artist = list[i].artists[0].name || '';
+                        let album = list[i].album.name || '';
+                        let image = list[i].artists[0].img1v1Url || '';
+                        let url = 'https://v1.hitokoto.cn/nm/redirect/music/' + list[i].id;
+
+                        musics.push({
+                            title: songName,
+                            description: '歌名: ' + songName + '\n歌手: ' + artist + '\n专辑: ' + album,
+                            picUrl: image,
+                            url: url,
+                        });
+                    }
+                    resp.reply({type: 'news', content: musics});
+                    return resp;
+                }
+            } else {
+                resp.reply('😭 服务维护中~');
+                return resp;
+            }
+        })
+        .catch(function (error) {
+            echo('网易云音乐接口调用失败');
+            resp.reply('😭 服务维护中~');
+            return resp;
         });
 }
 
