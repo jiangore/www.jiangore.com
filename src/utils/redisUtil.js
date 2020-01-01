@@ -5,11 +5,14 @@ let echo = require('debug')(app_name+':redisClient');
 const redis = require('redis');
 const moment = require('moment');
 
+let params = require('../params');
+let redisConfig = params.redisConfig;
+
 let client = redis.createClient({
-    host: '47.103.85.46',
-    port: 6379,
-    password: 'Tao#2020Ae',
-    db: 0,
+    host: redisConfig.host,
+    port: redisConfig.port,
+    password: redisConfig.password,
+    db: redisConfig.database,
     retry_strategy: function (options) {
         if (options.error && options.error.code === 'ECONNREFUSED') {
             return new Error('The server refused the connection');

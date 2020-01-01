@@ -1,7 +1,10 @@
+/**
+ * 主入口
+ * @type {module:path}
+ */
+let echo = require("debug")('dandelion:main');
 
-let express = require('express');
 let path = require('path');
-let cookieParser = require('cookie-parser');
 
 let dotEnv = require('dotenv');
 dotEnv.config({
@@ -10,7 +13,15 @@ dotEnv.config({
   path: path.resolve(process.cwd(), '.env')
 });
 
-console.log(require('./src/params'));
+
+let express = require('express');
+let favicon = require('serve-favicon');
+
+let cookieParser = require('cookie-parser');
+let session = require('express-session');
+
+let redisUtil = require('./src/utils/redisUtil');
+let RedisStore = require('connect-redis')(session);
 
 let app = express();
 
@@ -19,10 +30,23 @@ app.set('views', path.join(__dirname, 'views/ejs'));
 // app.set('view engine', 'pug');
 app.set('view engine', 'ejs');
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.query());
+
+app.use(express.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'public'), {maxAge: 86400000}));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+//session cookie设置
+app.use(cookieParser());
+app.use(session({
+  store: new RedisStore({client: redisUtil}),
+  name: 'sessionId',
+  secret: process.env.EXPRESS_SESSION_SECRET || 'dandelion2020',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {maxAge: 30 * 60 * 1000, httpOnly: true, secure: false}
+}));
+
 
 // morgan 日志中间件
 require('./src/middlewares/morgan')(app);

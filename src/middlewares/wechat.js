@@ -7,69 +7,28 @@
 let app_name = process.env.APP_NAME;
 let echo = require('debug')(app_name+':wx-middleware');
 
-let weChat = require('wechat');
+let wx = require('wechat');
 let params = require('../params');
-const apiUrl = require('../apiUrl');
 
-const urlEncode = require('urlencode');
-const axios = require('axios');
-
+let textMessage = require('../wechat/textMessageHandler');
+let imageMessage = require('../wechat/imageMessageHandler');
+let voiceMessage = require('../wechat/voiceMessageHandler');
+let videoMessage = require('../wechat/videoMessageHandler');
 
 module.exports = function (app) {
-    app.use('/wx', weChat(params.wxConfig).text(function (message, req, res, next) {
-        let xxx = req.weixin;
-        console.log(message);
 
-        let xb_url = apiUrl.AI_XB_URL;
-        xb_url = xb_url.replace('{msg}', urlEncode(message.Content));
-        axios
-            .get(xb_url)
-            .then(function (response) {
-                let data = response.data;
-                //console.log(urlEncode.decode(data.InstantMessage.ReplyText))
-                res.reply(urlEncode.decode(data.InstantMessage.ReplyText));
-
-            })
-            .catch(function (error) {
-                res.reply('不明白你的意思');
-            });
-
-        /*res.reply([
-            {
-                title: '你来我家接我吧',
-                description: '这是女神与高富帅之间的对话',
-                picurl: 'http://nodeapi.cloudfoundry.com/qrcode.jpg',
-                url: 'http://nodeapi.cloudfoundry.com/'
-            }
-        ]);*/
-        //res.reply({type: "text", content: 'Hello world!'});
-
+    app.use('/wx', wx(params.wxConfig).text(function (message, req, res, next) {
+        // 文本消息处理器
+        textMessage.handler(message, req, res, next);
     }).image(function (message, req, res, next) {
-        //console.log(message);
-        res.reply({
-            type: "image",
-            content: {
-                mediaId: message.MediaId
-            }
-        });
+        // 图片消息处理器
+        imageMessage.handler(message, req, res, next);
     }).voice(function (message, req, res, next) {
-        //console.log(message);
-        res.reply({
-            type: "voice",
-            content: {
-                mediaId: message.MediaId
-            }
-        });
-
+        // 语音消息处理器
+        voiceMessage.handler(message, req, res, next);
     }).video(function (message, req, res, next) {
-        //console.log(message);
-        res.reply({
-            type: "video",
-            content: {
-                mediaId: message.MediaId,
-                thumbMediaId: message.ThumbMediaId,
-            }
-        });
+        // 视频消息处理器
+        videoMessage.handler(message, req, res, next);
     }).location(function (message, req, res, next) {
         console.log(message);
     }).link(function (message, req, res, next) {

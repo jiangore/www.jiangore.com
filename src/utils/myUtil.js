@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const lodash = require('lodash');
 const moment = require('moment');
 const urlEncode = require('urlencode');
-const validator = require('validator');
 
 const numbers = '0123456789';
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
