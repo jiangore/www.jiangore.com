@@ -1,9 +1,9 @@
 /**
- * 颜值接口
+ * 测cp接口
  * @type {module:fs}
  */
-let app_name = process.env.APP_NAME;
-let echo = require('debug')(app_name+':wx-faceValueApi');
+let echo = require("debug")('app:testCoupleApi');
+
 
 const fs = require("fs");
 const path = require("path");
@@ -15,14 +15,14 @@ const agent = request.agent();
 const axios = require('axios');
 const http = require('http');
 
-const HOME_API = 'http://kan.msxiaobing.com/ImageGame/Portal?task=yanzhi';
-const FACE_API = 'http://kan.msxiaobing.com/Api/ImageAnalyze/Process?service=yanzhi';
+const HOME_API = 'http://kan.msxiaobing.com/ImageGame/Portal?task=guanxi';
+const FACE_API = 'http://kan.msxiaobing.com/Api/ImageAnalyze/Process?service=guanxi';
 const IMAGE_API = 'http://kan.msxiaobing.com/Api/Image/UploadBase64';
 
-let redisUtil = require('../utils/redisUtil');
-let wxConstant = require('./wxConstant');
+let redisUtil = require('../../utils/redisUtil');
+let wxConstant = require('../wxConstant');
 
-class FaceValue {
+class Couple {
     constructor(image, msgId) {
         this.image = image;
         this.msgId = msgId;
@@ -38,79 +38,47 @@ class FaceValue {
             return uploadImage(data);
         }).then(image => {
             //console.log(image);
-            return getFaceResult(image);
+            return getTestResult(image);
         }).then(content => {
-            //echo(content);
+            echo(content);
             let data = {
                 code: '1',
-                title: '颜值评分',
+                title: '小样儿，你的眼睛藏着秘密',
                 description: content.text,
                 picUrl: this.image,
                 url: content.imageUrl
             };
-            saveFaceValueData(data, this.msgId);
+            saveData(data, this.msgId);
         }).catch(error => {
             let data = {
                 code: '0',
-                title: '颜值评分',
+                title: '小样儿，你的眼睛藏着秘密',
                 description: error
             };
-            saveFaceValueData(data, this.msgId);
+            saveData(data, this.msgId);
         });
     }
 }
 
 /**
- * 保存颜值数据
+ * 保存CP数据
  * @param data
  */
-function saveFaceValueData(data, msgId) {
-    let key = wxConstant.FACE_VALUE_REDIS_PREFIX + msgId;
-    let expire = wxConstant.FACE_VALUE_REDIS_EXPIRE;
+function saveData(data, msgId) {
+    let key = wxConstant.COUPLE_REDIS_PREFIX + msgId;
+    let expire = wxConstant.COUPLE_REDIS_EXPIRE;
 
     redisUtil.set(key, JSON.stringify(data), (err) => {
         if (err) {
-            echo('redis存储[key=' + key + ']颜值数据失败。');
+            echo('redis存储[key=' + key + ']CP数据失败。');
         }
-        echo('redis存储[key=' + key + ']颜值数据成功。');
+        echo('redis存储[key=' + key + ']CP数据成功。');
     });
     redisUtil.expire(key, expire);
 }
 
 
-/**
- * sleep
- * @param second
- * @returns {Promise<unknown>}
- */
-function sleep(second) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve('want to sleep~');
-        }, second);
-    })
-};
 
-/**
- * 递归创建目录 同步方法
- */
-function mkdirSync(dirname) {
-    if (fs.existsSync(dirname)) {
-        return true;
-    } else {
-        if (mkdirSync(path.dirname(dirname))) {
-            fs.mkdirSync(dirname);
-            return true;
-        }
-    }
-}
-
-/*
-mkdirSync(cookieDir);
-fs.writeFile(cookieDir+'/a.txt','zuoyeti揍他',function(error){
-    console.log(error);
-});
-*/
 
 /**
  * 网络图片转base64
@@ -156,13 +124,6 @@ function image2Base64(url) {
     });
 }
 
-/*image2Base64("http://image.biaobaiju.com/uploads/20180803/22/1533305246-vubVlkJxID.jpeg")
-    .then(value => {
-        console.log(value);
-    }).catch(err => {
-        console.error(err);
-    });*/
-
 /**
  * 访问首页，check接口是否可用
  * @param url
@@ -178,6 +139,7 @@ function visitHome(data) {
             if (res.statusCode != 200) {
                 reject('维护中~');
             }
+
             resolve(data);
         });
     });
@@ -209,11 +171,11 @@ function uploadImage(binary) {
 }
 
 /**
- * 测试颜值结果
+ * 测试结果
  * @param data
  * @returns {Promise<unknown>}
  */
-function getFaceResult(data) {
+function getTestResult(data) {
     return new Promise(function (resolve, reject) {
         agent
             .post(FACE_API)
@@ -238,44 +200,5 @@ function getFaceResult(data) {
     });
 }
 
-
-/*
-image2Base64('http://ww3.sinaimg.cn/bmiddle/005PPoqYgy1gag94u560mj30u0190n4n.jpg')
-    .then(data => {
-        //console.log(data);
-        return visitHome(data);
-    }).then(data => {
-        //console.log(data);
-        return uploadImage(data);
-    }).then(image => {
-        console.log(image);
-        return getFaceResult(image);
-    }).catch(err => {
-        console.log(err);
-    });
-*/
-
-/*visitHome('http://ww3.sinaimg.cn/bmiddle/005PPoqYgy1gag94u560mj30u0190n4n.jpg').then(val => {
-    //console.log(val);
-    return val;
-}).then(val => {
-    //console.log(val);
-    return image2Base64(val)
-}).then(data => {
-    //console.log(data);
-    return uploadImage(data);
-}).then(data => {
-    console.log(data);
-    return getFaceResult(data);
-}).then(str => {
-    console.log(str);
-    return sleep(2000);
-}).catch(err => {
-    console.log(err);
-});*/
-
-
-//let face = new FaceValue('http://ww3.sinaimg.cn/bmiddle/005PPoqYgy1gag94u560mj30u0190n4n.jpg');
-
-module.exports = FaceValue;
+module.exports = Couple;
 

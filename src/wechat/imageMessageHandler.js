@@ -6,7 +6,13 @@
 let app_name = process.env.APP_NAME;
 let echo = require('debug')(app_name+':wx-imageMessage');
 
-let FaceValue = require('../wechat/faceValue');
+let Beauty = require('./api/beauty');
+let Couple = require('./api/couple');
+let Dress = require('./api/dress');
+let FaceValue = require('./api/faceValue');
+let Poem = require('./api/poem');
+
+
 let redisUtil = require('../utils/redisUtil');
 let wxMsgPrefix = 'wx:msg:';
 let wxMsgExpire = 15;
@@ -24,8 +30,8 @@ function handler(message, req, resp, next) {
             msgId = message.MsgId,
             mediaId = message.MediaId;
 
-        echo('图片地址:' + picUrl);
-        echo('当前场景:' + wxScene);
+        //echo('图片地址:' + picUrl);
+        //echo('当前场景:' + wxScene);
 
         //测颜值
         if (wxScene == wxConstant.FACE_VALUE_SCENE_CODE) {
@@ -33,7 +39,7 @@ function handler(message, req, resp, next) {
                 if (val == null) {
                     redisUtil.set(wxMsgPrefix + message.MsgId, message.FromUserName + '_' + message.CreateTime + '_image');
                     redisUtil.expire(wxMsgPrefix + message.MsgId, wxMsgExpire);
-                    new FaceValue(picUrl, msgId);
+                    new Beauty(picUrl, msgId);
                 } else {
                     //不为null时, 已经有相同的消息的，进入微信消息排重机制
                     //返回空字符，微信服务器不会对此作任何处理，并且不会发起重试
@@ -43,6 +49,58 @@ function handler(message, req, resp, next) {
                 }
             });
         }
+
+        //测CP
+        if (wxScene == wxConstant.COUPLE_SCENE_CODE) {
+            redisUtil.get(wxMsgPrefix + message.MsgId, function (err, val) {
+                if (val == null) {
+                    redisUtil.set(wxMsgPrefix + message.MsgId, message.FromUserName + '_' + message.CreateTime + '_image');
+                    redisUtil.expire(wxMsgPrefix + message.MsgId, wxMsgExpire);
+                    new Couple(picUrl, msgId);
+                } else {
+                    //不为null时, 已经有相同的消息的，进入微信消息排重机制
+                    //返回空字符，微信服务器不会对此作任何处理，并且不会发起重试
+                    let text = '处理中~\n回复以下数字查看结果\n'+ msgId;
+                    resp.reply(text);
+                    return resp;
+                }
+            });
+        }
+
+        //测穿衣
+        if (wxScene == wxConstant.DRESS_SCENE_CODE) {
+            redisUtil.get(wxMsgPrefix + message.MsgId, function (err, val) {
+                if (val == null) {
+                    redisUtil.set(wxMsgPrefix + message.MsgId, message.FromUserName + '_' + message.CreateTime + '_image');
+                    redisUtil.expire(wxMsgPrefix + message.MsgId, wxMsgExpire);
+                    new Dress(picUrl, msgId);
+                } else {
+                    //不为null时, 已经有相同的消息的，进入微信消息排重机制
+                    //返回空字符，微信服务器不会对此作任何处理，并且不会发起重试
+                    let text = '处理中~\n回复以下数字查看结果\n'+ msgId;
+                    resp.reply(text);
+                    return resp;
+                }
+            });
+        }
+
+        //作诗
+        if (wxScene == wxConstant.POEM_SCENE_CODE) {
+            redisUtil.get(wxMsgPrefix + message.MsgId, function (err, val) {
+                if (val == null) {
+                    redisUtil.set(wxMsgPrefix + message.MsgId, message.FromUserName + '_' + message.CreateTime + '_image');
+                    redisUtil.expire(wxMsgPrefix + message.MsgId, wxMsgExpire);
+                    new Poem(picUrl, msgId);
+                } else {
+                    //不为null时, 已经有相同的消息的，进入微信消息排重机制
+                    //返回空字符，微信服务器不会对此作任何处理，并且不会发起重试
+                    let text = '处理中~\n回复以下数字查看结果\n'+ msgId;
+                    resp.reply(text);
+                    return resp;
+                }
+            });
+        }
+
     }
 }
 

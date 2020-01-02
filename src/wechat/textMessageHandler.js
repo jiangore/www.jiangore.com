@@ -2,7 +2,9 @@
  * 微信公众号文本消息处理器
  * @type {encode}
  */
-let echo = require("debug")('app:wxTextMessage');
+
+let app_name = process.env.APP_NAME;
+let echo = require('debug')(app_name+':wx-textMessage');
 
 const urlEncode = require('urlencode');
 const axios = require('axios');
@@ -34,11 +36,28 @@ function handler(message, req, resp, next) {
             resp.reply('您想和我聊什么😍');
             return resp;
         }
+
         if (wxScene == '' && content == '颜值') {
             req.wxsession.wxScene = wxConstant.FACE_VALUE_SCENE_CODE;
-            resp.reply('发送一张你的靓照吧！');
+            resp.reply('发一张你的靓照吧~');
             return resp;
         }
+        if (wxScene == '' && content == '关系') {
+            req.wxsession.wxScene = wxConstant.COUPLE_SCENE_CODE;
+            resp.reply('发一张照片，至少有两人~');
+            return resp;
+        }
+        if (wxScene == '' && content == '穿衣') {
+            req.wxsession.wxScene = wxConstant.DRESS_SCENE_CODE;
+            resp.reply('发一张你的靓照吧~');
+            return resp;
+        }
+        if (wxScene == '' && content == '作诗') {
+            req.wxsession.wxScene = wxConstant.POEM_SCENE_CODE
+            resp.reply('发一张照片，喝口水的功夫作成一首诗~');
+            return resp;
+        }
+
         if (wxScene == '' && content == '音乐') {
             req.wxsession.wxScene = wxConstant.MUSIC_SCENE_CODE;
 
@@ -60,6 +79,36 @@ function handler(message, req, resp, next) {
             text += '回复[f]：网络段子\n';
             text += '回复[g]：其他格言\n';
             text += '任意字符：随机一段话\n';
+            text += '关键词不带[]';
+            resp.reply(text);
+            return resp;
+        }
+
+        if (wxScene == '' && content == '天气') {
+            resp.reply([
+                {
+                    title: '天气预报',
+                    description: '实况天气\n逐小时预报\n生活指数\n7天预报',
+                    picUrl: 'https://mmbiz.qpic.cn/mmbiz_png/KP1N7xMkEdHicrywoTgEcqx2OM5ia0y58mtKznDvU475AxEZtTq3K6aYkrOXOhCHuDOtlgdKAuJEB0E0smxVZC6A/0?wx_fmt=png',
+                    url: 'https://apip.weatherdt.com/h5.html?id=cdyLDqDf2v',
+                }
+            ]);
+            return resp;
+        }
+
+        if (wxScene == '' && content == '翻译') {
+            req.wxsession.wxScene = wxConstant.TRANSLATE_SCENE_CODE;
+            let text = '';
+            text += '回复[中英]：中文 -> 英语\n';
+            text += '回复[中日]：中文 -> 日语\n';
+            text += '回复[中韩]：中文 -> 韩语\n';
+            text += '回复[中法]：中文 -> 法语\n';
+            text += '回复[中俄]：中文 -> 俄语\n';
+            text += '回复[英中]：英语 -> 中文\n';
+            text += '回复[日中]：日语 -> 中文\n';
+            text += '回复[韩中]：韩语 -> 中文\n';
+            text += '回复[法中]：法语 -> 中文\n';
+            text += '回复[俄中]：俄语 -> 中文\n';
             text += '关键词不带[]';
             resp.reply(text);
             return resp;
@@ -103,6 +152,87 @@ function handler(message, req, resp, next) {
                 wxScene = 1;
             }
         }
+        // CP场景 (非文本消息 防止匹配不到 进行意外处理)
+        if (wxScene == wxConstant.COUPLE_SCENE_CODE) {
+            // 获取颜值结果
+            if (testMsgId(trim(content))) {
+                let key = wxConstant.COUPLE_REDIS_PREFIX + trim(content);
+                redisUtil.get(key, (err, value) => {
+                    if (err) {
+                        resp.reply('😭 数据没找到，请确认您的识别码，或者再测一次~');
+                        return resp;
+                    }
+                    let data = JSON.parse(value);
+                    if (data.code == '1') {
+                        resp.reply([
+                            {
+                                title: data.title,
+                                description: data.description,
+                                picUrl: data.picUrl,
+                                url: data.url,
+                            }
+                        ]);
+                        return resp;
+                    } else {
+                        resp.reply('😭 数据没找到，请确认您的识别码，或者再测一次~');
+                        return resp;
+                    }
+                });
+            } else {
+                // 意外处理
+                wxScene = 1;
+            }
+        }
+        // 穿衣场景 (非文本消息 防止匹配不到 进行意外处理)
+        if (wxScene == wxConstant.DRESS_SCENE_CODE) {
+            // 获取颜值结果
+            if (testMsgId(trim(content))) {
+                let key = wxConstant.DRESS_REDIS_PREFIX + trim(content);
+                redisUtil.get(key, (err, value) => {
+                    if (err) {
+                        resp.reply('😭 数据没找到，请确认您的识别码，或者再测一次~');
+                        return resp;
+                    }
+                    let data = JSON.parse(value);
+                    if (data.code == '1') {
+                        resp.reply([
+                            {
+                                title: data.title,
+                                description: data.description,
+                                picUrl: data.picUrl,
+                                url: data.url,
+                            }
+                        ]);
+                        return resp;
+                    } else {
+                        resp.reply('😭 数据没找到，请确认您的识别码，或者再测一次~');
+                        return resp;
+                    }
+                });
+            } else {
+                // 意外处理
+                wxScene = 1;
+            }
+        }
+        // 作诗场景 (非文本消息 防止匹配不到 进行意外处理)
+        if (wxScene == wxConstant.POEM_SCENE_CODE) {
+            // 获取颜值结果
+            if (testMsgId(trim(content))) {
+                let key = wxConstant.POEM_REDIS_PREFIX + trim(content);
+                redisUtil.get(key, (err, value) => {
+                    if (err) {
+                        resp.reply('😭 数据没找到，请确认您的识别码，或者再测一次~');
+                        return resp;
+                    }
+                    let data = JSON.parse(value);
+                    resp.reply(data.description);
+                    return resp;
+                });
+            } else {
+                // 意外处理
+                wxScene = 1;
+            }
+        }
 
         //网易云音乐
         if (wxScene == wxConstant.MUSIC_SCENE_CODE) {
@@ -114,16 +244,27 @@ function handler(message, req, resp, next) {
             motto(message, req, resp);
         }
 
+        //翻译
+        if (wxScene == wxConstant.TRANSLATE_SCENE_CODE) {
+            //motto(message, req, resp);
+            resp.reply('开发中~');
+            return resp;
+        }
+
 
         //第4步 当以上全部没有处理时 给予帮助提醒
         //需要把场景设为空, 等待匹配用户的下一个关键词
         if (wxScene == '' || wxScene == 1) {
             req.wxsession.wxScene = '';
 
-            let text = '回复[小冰]：和智能机器人聊天\n';
-            text += '回复[颜值]：给你的Ta颜值评分\n';
-            text += '回复[音乐]：发现你喜欢的音乐\n';
-            text += '回复[格言]：一句戳中你内心的话\n';
+            let text = '回复[小冰]：和智能机器人聊天~\n';
+            text += '回复[颜值]：给你的Ta颜值评分~\n';
+            text += '回复[关系]：合照里的CP秘密~\n';
+            text += '回复[穿衣]：穿搭不能太任性~\n';
+            text += '回复[作诗]：写诗，so easy~\n';
+            text += '回复[天气]：实况天气&生活指数~\n';
+            text += '回复[音乐]：发现你喜欢的音乐~\n';
+            text += '回复[格言]：一句戳中你内心的话~\n';
             text += '回复[退出]：退出当前场景\n';
             text += '关键词不带[]';
             resp.reply(text);
