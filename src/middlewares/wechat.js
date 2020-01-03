@@ -14,6 +14,7 @@ let textMessage = require('../wechat/textMessageHandler');
 let imageMessage = require('../wechat/imageMessageHandler');
 let voiceMessage = require('../wechat/voiceMessageHandler');
 let videoMessage = require('../wechat/videoMessageHandler');
+let eventMessage = require('../wechat/eventMessageHandler');
 
 module.exports = function (app) {
 
@@ -34,7 +35,10 @@ module.exports = function (app) {
     }).link(function (message, req, res, next) {
         console.log(message);
     }).event(function (message, req, res, next) {
-        console.log(message);
+
+        // 事件消息处理器
+        eventMessage.handler(message, req, res, next);
+
     }).device_text(function (message, req, res, next) {
         console.log(message);
     }).device_event(function (message, req, res, next) {

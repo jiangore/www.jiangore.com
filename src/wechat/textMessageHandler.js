@@ -265,7 +265,7 @@ function handler(message, req, resp, next) {
             text += '回复[天气]：实况天气&生活指数~\n';
             text += '回复[音乐]：发现你喜欢的音乐~\n';
             text += '回复[格言]：一句戳中你内心的话~\n';
-            text += '回复[退出]：退出当前场景\n';
+            text += '回复[退出]：退出后，切换功能\n';
             text += '关键词不带[]';
             resp.reply(text);
             return resp;
